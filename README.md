@@ -1,191 +1,209 @@
-# 🛠️ FIXORA — AI-Powered Home Repair Assistant
+# FIXORA — AI-Powered Home Repair Assistant
 
-<div align="center">
+> **“SEE IT. UNDERSTAND IT. FIX IT SAFELY.”**
 
-**“SEE IT. UNDERSTAND IT. FIX IT SAFELY.”**
-
-*A multimodal AI & IoT assistant guiding homeowners through safe, intelligent circuit diagnostics and repair workflows.*
-
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Google Gemini](https://img.shields.io/badge/Gemini_Vision-3.8_Flash-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
-[![ESP32](https://img.shields.io/badge/Hardware-ESP32_IoT-E7352C?style=for-the-badge&logo=espressif&logoColor=white)](https://www.espressif.com/)
-[![Academic](https://img.shields.io/badge/Project-Engineering_Clinics_Review--II-green?style=for-the-badge)](https://github.com/likhita007/FIXORA)
-
-</div>
+FIXORA is an AI-assisted diagnostic tool designed to help users identify visual wiring faults in low-voltage electrical circuits. By combining computer vision with structured diagnostic reasoning, FIXORA analyzes captured circuit images and returns actionable fault information to guide safe troubleshooting.
 
 ---
 
-## 📌 1. Project Overview
+## 1. Project Overview
 
-**FIXORA** is an intelligent, safety-first home repair diagnostic system developed for B.Tech Engineering Clinics. It bridges the gap between complex electrical/hardware troubleshooting and non-expert homeowners by combining:
-1. **Multimodal Computer Vision** (Google Gemini 3.8 Flash) to inspect circuit anomalies visually.
-2. **Safety & Risk Classification Engine** to evaluate hazards and prevent dangerous DIY actions on high-voltage systems.
-3. **Step-by-Step Interactive Repair Guidance** to provide clear, foolproof repair procedures.
-4. **IoT Hardware Continuity Testbed** (ESP32) to physically verify circuit restoration in real time.
+Diagnosing open, loose, or incorrectly routed connections in prototyping circuits often requires manual tracing and multimeters. FIXORA explores how multimodal Large Language Models (LLMs) with vision capabilities can assist in visual inspection.
+
+The system takes an image of a low-voltage circuit (such as a solderless breadboard with jumper wires, switches, resistors, and LEDs), analyzes the visible wiring paths against component connection rules, and generates a structured diagnosis detailing the presence, type, location, and potential cause of any visible wiring fault.
 
 ---
 
-## 🔄 2. End-to-End System Workflow
+## 2. Key Features
 
-```mermaid
-flowchart TD
-    subgraph S1["1. Capture & Input Layer"]
-        A["User / Mobile Camera"] -->|"Capture Circuit Photo"| B["Flutter Viewfinder UI"]
-        B -->|"Uint8List Image Bytes"| C["GeminiService Client"]
-    end
+- **Multimodal Visual Inspection**: Analyzes circuit images using Google Gemini Vision (`gemini-3.8-flash`) to detect visible connection issues.
+- **Structured JSON Schema**: Enforces structured JSON output via API-level schema constraints (`response_mime_type: application/json`).
+- **Validated Domain Model (`DiagnosisResult`)**: Sanitizes and validates model responses into a typed Dart object with bounded confidence values (`0.0` to `1.0`).
+- **Defensive Error & Fallback Handling**: Safely handles blurry or uninterpretable images (`UNKNOWN` status) and network timeouts/failures (`ERROR` status) without unhandled exceptions.
+- **Header-Based REST Authentication**: Direct HTTP client integration using the official `x-goog-api-key` header.
+- **Secure Key Management**: Supports compile-time configuration via Flutter's `--dart-define=GEMINI_API_KEY=...` to keep API keys out of source code.
 
-    subgraph S2["2. AI Intelligence Layer (ai_vision)"]
-        C -->|"POST Request (x-goog-api-key)"| D["Google Gemini 3.8 Flash API"]
-        D -->|"Structured JSON Output"| E["DiagnosisResult Parser & Validator"]
-    end
+---
 
-    subgraph S3["3. Safety & Decision Layer"]
-        E -->|"Validated Diagnosis"| F{"Safety & Risk Engine"}
-        F -->|"High-Voltage / Hazardous"| G["⚠️ Lockout & Professional Referral"]
-        F -->|"Low-Voltage Educational Fault"| H["✅ Safe DIY Repair Approved"]
-    end
+## 3. System Architecture
 
-    subgraph S4["4. Guided Repair Layer"]
-        H -->|"Load Checklist & Steps"| I["Interactive Step-by-Step UI"]
-        I -->|"User Reconnects Jumper Wire"| J["Physical Testbed Updated"]
-    end
+The core data flow of the FIXORA AI Vision system operates as follows:
 
-    subgraph S5["5. Hardware Verification Layer"]
-        J -->|"Circuit Closed (3.3V/5V Loop)"| K["ESP32 Continuity Sensor (GPIO)"]
-        K -->|"Status Stream (WiFi / Serial)"| L["Flutter Success Confirmation Screen"]
-    end
+```
+[ Client Application / Camera ]
+               │
+               ▼  (Uint8List image bytes)
+[ GeminiService.analyzeCircuitImage() ]
+               │
+               ▼  (HTTP POST with x-goog-api-key)
+[ Google Gemini 3.8 Flash REST API ]
+               │
+               ▼  (application/json response)
+[ JSON Extraction & Sanitization ]
+               │
+               ▼  (fromJson factory parsing)
+[ DiagnosisResult Domain Model ]
+               │
+               ▼
+[ UI Presentation / Safety Layer ]
 ```
 
 ---
 
-## 🧩 3. Core Modules & Specifications
+## 4. Technology Stack
 
-| # | Module Name | Primary Role | Tech Stack | Input / Output |
-|:---:|:---|:---|:---|:---|
-| **1** | **Mobile Client UI** | Camera capture viewfinder, diagnosis card presentation, interactive checklist UI | Flutter / Dart | **Input:** Camera stream<br>**Output:** Raw image bytes & UI state |
-| **2** | **AI Vision & Diagnosis** | Multimodal circuit anomaly detection & structured JSON schema generation | Google Gemini `gemini-3.8-flash`, `http` | **Input:** `Uint8List` image bytes<br>**Output:** Strongly typed `DiagnosisResult` |
-| **3** | **Safety & Risk Engine** | Hazard scoring, DIY vs. Professional lockout enforcement, PPE checklists | Dart Rule Engine | **Input:** `DiagnosisResult`<br>**Output:** Safety clearance status |
-| **4** | **Step-by-Step Guidance** | Dynamic visual repair walkthrough with safety gates | Flutter State Machine | **Input:** Fault type + Component location<br>**Output:** Visual instructions |
-| **5** | **ESP32 Physical Testbed** | Low-voltage continuity sensing & real-time physical confirmation | ESP32, C++ (Arduino IDE), Breadboard | **Input:** Closed loop on GPIO pin<br>**Output:** Continuity status stream |
+- **Language / Framework**: Dart `^3.0.0` / Flutter SDK `^3.0.0`
+- **Networking**: `http: ^1.2.0`
+- **AI Model**: Google Gemini (`gemini-3.8-flash`) via Google AI Studio REST API (`v1beta`)
+- **Data Exchange**: JSON (`application/json`)
 
 ---
 
-## 📸 4. Detailed Module-by-Module Breakdown
+## 5. Project Modules
 
-### 📱 Module 1: Flutter Mobile Client
-- **Camera Module**: Captures high-resolution frames of educational circuits with auto-focus and illumination warnings.
-- **State Management**: Reactive state management handling diagnosis loading, error recovery, and hardware status streams.
-- **Fail-Safe UI**: Displays instant visual badges (`SUCCESS`, `UNKNOWN`, `ERROR`) and clamps confidence indicators.
+The repository currently contains the following core module:
 
-### 🧠 Module 2: AI Vision & Diagnosis (`ai_vision/`)
-- **Direct Gemini REST Client**: Communicates via standard `http` package with Google Gemini v1beta endpoint using `x-goog-api-key` header authentication.
-- **Model**: `gemini-3.8-flash` with `response_mime_type: application/json`.
-- **Domain Model**: `DiagnosisResult` ensures sanitized parsing, bounding confidence between `0.0` and `1.0`.
-- **Zero API Key Leakage**: Keys are passed at compile time via `--dart-define=GEMINI_API_KEY=...`.
-
-```json
-{
-  "status": "SUCCESS",
-  "fault_detected": true,
-  "fault_type": "DISCONNECTED_WIRE",
-  "location": "Jumper wire connection between switch and breadboard terminal",
-  "possible_cause": "The jumper wire appears disconnected or unseated, resulting in an open circuit.",
-  "confidence": 0.92
-}
-```
-
-### 🛡️ Module 3: Safety & Risk Engine
-- **Pre-Diagnostic Safety Checks**: Inspects image classification for AC mains or high-voltage lines.
-- **Automatic Lockout**: If AC mains or hazardous voltage is suspected, immediately triggers an emergency warning and directs the user to certified technicians.
-- **Mandatory Safety Protocols**: Low-voltage repair workflows require users to toggle the power switch off before touching breadboard jumpers.
-
-### 📋 Module 4: Dynamic Repair Guidance
-1. **Preparation**: Display tools needed (e.g., standard male-to-male jumper wire).
-2. **Safety Check**: Confirm circuit switch is open/off.
-3. **Target Action**: Re-seat the disconnected jumper wire into the specified breadboard row.
-4. **Power Restoration**: Switch circuit power back on and observe LED state.
-
-### ⚡ Module 5: ESP32 Hardware Verification Testbed
-- **Testbed Setup**: ESP32 Microcontroller, Solderless Breadboard, Toggle Switch, 220Ω Resistor, 5V LED, and Jumper Wires.
-- **Continuity Verification**: ESP32 reads digital logic state on designated GPIO pins.
-- When the disconnected jumper is replaced, the continuity loop closes, sending an instant confirmation signal back to the Flutter app.
+### `ai_vision/` — AI Vision & Diagnosis Module
+Provides the computer-vision diagnostic engine and data models:
+- **[`gemini_service.dart`](ai_vision/gemini_service.dart)**: Contains the `GeminiService` client class and the `DiagnosisResult` domain data model.
+- **[`prompts.txt`](ai_vision/prompts.txt)**: Defines the system prompt, diagnostic instructions, operational boundaries, and JSON schema.
+- **[`sample_diagnosis.json`](ai_vision/sample_diagnosis.json)**: Contains sample JSON payloads representing success, fault detection, and unknown/blurry image states.
+- **[`README.md`](ai_vision/README.md)**: Detailed module-level documentation and Flutter UI integration example.
 
 ---
 
-## 🔬 5. Review-II Primary Demonstration Flow
+## 6. How It Works
 
-```text
-[ Step 1: Fault State ]
-  Breadboard jumper wire between switch and resistor is intentionally unplugged.
-  Circuit LED is OFF.
-        │
-        ▼
-[ Step 2: AI Image Capture ]
-  User opens FIXORA app and snaps a photo of the breadboard.
-        │
-        ▼
-[ Step 3: Gemini Vision Diagnosis ]
-  Gemini 3.8 Flash analyzes image and returns:
-  fault_detected: true, fault_type: "DISCONNECTED_WIRE"
-        │
-        ▼
-[ Step 4: Safety & Repair Guidance ]
-  App verifies low-voltage status and displays step-by-step reconnect instructions.
-        │
-        ▼
-[ Step 5: User Fix & Physical Sensing ]
-  User re-inserts jumper wire. ESP32 detects circuit continuity.
-  LED turns ON + App displays "Circuit Verified Successfully!".
-```
+1. **Image Input**: The client application captures an image of a low-voltage circuit and passes the image as raw bytes (`Uint8List`) to `GeminiService.analyzeCircuitImage()`.
+2. **Request Construction**: `GeminiService` prepares a multimodal request containing the diagnostic prompt and base64-encoded image data, configured with `response_mime_type: 'application/json'`.
+3. **API Dispatch**: An HTTP POST request is sent to `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent` authenticated via the `x-goog-api-key` header.
+4. **Response Parsing**: The raw JSON payload returned by Gemini is extracted, sanitized, and parsed by `DiagnosisResult.fromJson()`.
+5. **Contract Enforcement**: The parsed output adheres strictly to the six-field contract:
+   - `status`: Diagnostic outcome (`SUCCESS`, `UNKNOWN`, `ERROR`).
+   - `fault_detected`: Boolean flag indicating if an electrical fault was identified.
+   - `fault_type`: Standardized fault classification (`NONE`, `DISCONNECTED_WIRE`, `LOOSE_WIRE`, `WRONG_CONNECTION`, `UNKNOWN`).
+   - `location`: Specific breadboard terminal, row, or component location.
+   - `possible_cause`: Concise explanation of the identified condition.
+   - `confidence`: Numeric confidence score clamped between `0.0` and `1.0`.
 
 ---
 
-## 📂 6. Repository Structure
+## 7. Repository Structure
 
 ```text
 FIXORA/
-├── README.md                  # Comprehensive project & multi-module workflow guide
-└── ai_vision/                 # Module 2: AI Multimodal Diagnosis
-    ├── README.md              # AI Vision integration guide & usage examples
-    ├── sample_diagnosis.json  # Validated test payloads (Fault, Normal, Blurry)
-    ├── gemini_service.dart    # Dart service & DiagnosisResult domain model
-    └── prompts.txt            # System prompt & structured JSON schema
+├── README.md
+└── ai_vision/
+    ├── README.md
+    ├── gemini_service.dart
+    ├── prompts.txt
+    └── sample_diagnosis.json
 ```
 
 ---
 
-## 🚀 7. Quickstart & Integration
+## 8. Setup and Installation
 
 ### Prerequisites
-- Flutter SDK `^3.0.0`
-- Dart SDK `^3.0.0`
-- Google AI Studio Gemini API Key
+- Dart SDK `^3.0.0` or Flutter SDK `^3.0.0`
+- A Google AI Studio API key for Gemini
 
-### Running the App with AI Vision
+### Dependency Configuration
+Add the standard HTTP package to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+```
+
+Install dependencies:
 ```bash
-# 1. Clone repository
-git clone https://github.com/likhita007/FIXORA.git
-cd FIXORA
-
-# 2. Install dependencies
 flutter pub get
-
-# 3. Run application with secure compile-time API key
-flutter run --dart-define=GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
 ```
 
 ---
 
-## 👥 8. Engineering Clinics Team & Roles
+## 9. Configuration
 
-*   **AI Vision & Multimodal Module**: Prompt engineering, Gemini 3.8 Flash REST client, JSON contract model (`ai_vision/`).
-*   **Flutter Mobile App**: UI/UX design, camera integration, reactive state management.
-*   **Safety & Guidance System**: Risk decision engine and interactive troubleshooting checklists.
-*   **IoT & Hardware Integration**: ESP32 firmware, circuit testbed assembly, continuity sensing.
+The module retrieves the API key at compile time from the environment.
+
+### Setting the API Key
+Pass the API key using `--dart-define` when running or building your Flutter app:
+
+```bash
+flutter run --dart-define=GEMINI_API_KEY=your_actual_api_key_here
+```
+
+Alternatively, pass the key directly during instantiation in code:
+```dart
+final service = GeminiService(apiKey: 'your_actual_api_key_here');
+```
+
+> **Security Note**: Never commit actual API keys or credentials to version control.
 
 ---
 
-<div align="center">
-<b>FIXORA — Engineering Clinics Project</b><br>
-<i>See It. Understand It. Fix It Safely.</i>
-</div>
+## 10. Running the Project
+
+### Basic Usage Example
+
+```dart
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'ai_vision/gemini_service.dart';
+
+void main() async {
+  final geminiService = GeminiService();
+
+  // Example: Pass image bytes from camera or file
+  Uint8List sampleImageBytes = Uint8List(0); // Replace with actual image data
+
+  final DiagnosisResult result = await geminiService.analyzeCircuitImage(sampleImageBytes);
+
+  print('Diagnosis Status: ${result.status}');
+  print('Fault Detected:   ${result.faultDetected}');
+  print('Fault Type:       ${result.faultType}');
+  print('Location:         ${result.location}');
+  print('Possible Cause:   ${result.possibleCause}');
+  print('Confidence:       ${(result.confidence * 100).toStringAsFixed(1)}%');
+}
+```
+
+---
+
+## 11. Team / Contributions
+
+Contributions and enhancements to FIXORA are welcome.
+
+### How to Contribute
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/new-feature`).
+3. Commit your changes (`git commit -m "Add new feature"`).
+4. Push to the branch (`git push origin feature/new-feature`).
+5. Open a Pull Request.
+
+---
+
+## 12. Safety / Limitations
+
+- **Low-Voltage Scope**: The system is intended exclusively for low-voltage educational and prototyping circuits (DC 3.3V / 5V).
+- **No Safety Guarantee**: Visual inspection through computer vision cannot guarantee electrical safety, verify component internal state, or replace physical measurement instruments (e.g., multimeters).
+- **Mains Electricity Restriction**: Never use this system on high-voltage alternating current (AC) household mains wiring or live electrical panels. Doing so poses severe risks of electric shock, electrocution, and fire.
+
+---
+
+## 13. Future Improvements
+
+Planned areas for future development include:
+- **Mobile Camera UI Integration**: Real-time camera viewfinder with dynamic bounding box overlays for detected faults.
+- **Hardware Loop Verification**: IoT microcontroller integration (e.g., ESP32 continuity sensing) to verify physical circuit restoration.
+- **Extended Fault Types**: Support for multi-branch circuits, reversed polarity detection, and incorrect resistor values.
+- **Offline Inference**: Exploring on-device lightweight vision models for connectivity-constrained environments.
+
+---
+
+## 14. License
+
+This repository does not currently have an open-source license assigned. All rights are reserved by the project contributors. Contact the repository owner for permissions and usage inquiries.
