@@ -5,7 +5,13 @@
     "fault_type": "DISCONNECTED_WIRE",
     "location": "Jumper wire connection between switch and breadboard",
     "possible_cause": "The jumper wire appears disconnected from the breadboard, creating an open circuit.",
-    "confidence": 0.92
+    "confidence": 0.92,
+    "bounding_box": {
+      "ymin": 0.35,
+      "xmin": 0.42,
+      "ymax": 0.58,
+      "xmax": 0.65
+    }
   },
   {
     "status": "SUCCESS",
