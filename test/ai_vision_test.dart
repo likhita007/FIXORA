@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import '../ai_vision/gemini_service.dart';
+import '../ai_vision/gemini_code/gemini_service.dart';
 
 void main() {
   group('DiagnosisResult Domain Model Tests', () {

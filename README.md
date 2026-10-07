@@ -66,11 +66,12 @@ The system takes an image of a low-voltage circuit (such as a solderless breadbo
 The repository contains the following core modules and tests:
 
 ### `ai_vision/` — AI Vision & Diagnosis Module
-Provides the computer-vision diagnostic engine and data models:
-- **[`gemini_service.dart`](ai_vision/gemini_service.dart)**: Contains `GeminiService`, `BoundingBox`, and `DiagnosisResult` domain data models with exponential backoff retries.
+Provides the computer-vision diagnostic engine, data models, and integration documentation:
+- **[`gemini_code/gemini_service.dart`](ai_vision/gemini_code/gemini_service.dart)**: Contains `GeminiService`, `BoundingBox`, and `DiagnosisResult` domain data models with exponential backoff retries.
+- **[`integration_information.md`](ai_vision/integration_information.md)**: Person's final Input/Output format specifications, JSON contract, and Flutter integration guide.
 - **[`prompts.txt`](ai_vision/prompts.txt)**: Defines the system prompt, diagnostic instructions, operational boundaries, and JSON schema.
 - **[`sample_diagnosis.json`](ai_vision/sample_diagnosis.json)**: Contains sample JSON payloads representing success (with bounding box), normal circuit, and unknown/blurry image states.
-- **[`README.md`](ai_vision/README.md)**: Detailed module-level documentation and Flutter UI integration example with custom bounding box painter.
+- **[`README.md`](ai_vision/README.md)**: Detailed module-level documentation and quickstart reference.
 
 ### `test/` — Automated Test Suite
 - **[`ai_vision_test.dart`](test/ai_vision_test.dart)**: Unit tests for domain models, coordinate normalization, confidence clamping, mock API parsing, and HTTP 429 retry recovery.
@@ -101,9 +102,11 @@ FIXORA/
 ├── README.md
 ├── ai_vision/
 │   ├── README.md
-│   ├── gemini_service.dart
 │   ├── prompts.txt
-│   └── sample_diagnosis.json
+│   ├── sample_diagnosis.json
+│   ├── integration_information.md
+│   └── gemini_code/
+│       └── gemini_service.dart
 └── test/
     └── ai_vision_test.dart
 ```
