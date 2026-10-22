@@ -298,6 +298,55 @@ REPAIR_KNOWLEDGE_BASE = {
         "professional_required": False
     },
 
+    "disconnected_wire": {
+        "risk": "LOW",
+        "decision": "APPROVED_GUIDANCE",
+        "precautions": [
+            "Work strictly on low-voltage (3.3V / 5V) educational circuits.",
+            "Turn off the circuit switch or disconnect USB power before touching wiring.",
+            "Never perform repairs on household AC mains electricity."
+        ],
+        "repair_guidance": [
+            "Disconnect power from the breadboard circuit.",
+            "Identify the unseated jumper wire pinpointed by AI Vision.",
+            "Firmly re-insert the jumper wire pin into the correct breadboard terminal row.",
+            "Check all connections before turning the switch or power back on."
+        ],
+        "professional_required": False
+    },
+
+    "disconnected_jumper_wire": {
+        "risk": "LOW",
+        "decision": "APPROVED_GUIDANCE",
+        "precautions": [
+            "Work strictly on low-voltage (3.3V / 5V) educational circuits.",
+            "Turn off the circuit switch or disconnect USB power before touching wiring.",
+            "Never perform repairs on household AC mains electricity."
+        ],
+        "repair_guidance": [
+            "Disconnect power from the breadboard circuit.",
+            "Identify the unseated jumper wire pinpointed by AI Vision.",
+            "Firmly re-insert the jumper wire pin into the correct breadboard terminal row.",
+            "Check all connections before turning the switch or power back on."
+        ],
+        "professional_required": False
+    },
+
+    "loose_wire": {
+        "risk": "LOW",
+        "decision": "APPROVED_GUIDANCE",
+        "precautions": [
+            "Work strictly on low-voltage DC prototyping circuits.",
+            "Turn off power before touching components."
+        ],
+        "repair_guidance": [
+            "Disconnect power from the circuit.",
+            "Gently press the loose jumper wire pin into its terminal row.",
+            "Verify mechanical stability before testing."
+        ],
+        "professional_required": False
+    },
+
     "dripping_pipe_near_electricity": {
         "risk": "HIGH",
         "decision": "STOP_AND_ESCALATE",
