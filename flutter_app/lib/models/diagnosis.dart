@@ -1,28 +1,61 @@
+/// Result of the AI vision analysis (produced by [AiService]).
 class Diagnosis {
-  final bool faultDetected;
-  final String faultType;
-  final String location;
-  final String possibleCause;
-  final String confidence;
-  final String safetyRisk;
+  final String faultName;
+  final String component;
+  final String description;
 
-  Diagnosis({
-    required this.faultDetected,
-    required this.faultType,
-    required this.location,
-    required this.possibleCause,
+  /// Confidence between 0.0 and 1.0.
+  final double confidence;
+  final List<String> possibleCauses;
+
+  const Diagnosis({
+    required this.faultName,
+    required this.component,
+    required this.description,
     required this.confidence,
-    required this.safetyRisk,
+    this.possibleCauses = const [],
   });
+
+  /// Sample result used when no Gemini API key is configured (demo mode).
+  factory Diagnosis.demo() => const Diagnosis(
+        faultName: 'Loose jumper wire',
+        component: 'Breadboard wiring',
+        description:
+            'The jumper wire feeding the LED is not making firm contact, so '
+            'the circuit is open and the LED stays off.',
+        confidence: 0.86,
+        possibleCauses: [
+          'Wire not fully inserted into the breadboard',
+          'Worn breadboard contact',
+        ],
+      );
 
   factory Diagnosis.fromJson(Map<String, dynamic> json) {
     return Diagnosis(
-      faultDetected: json['fault_detected'] ?? false,
-      faultType: json['fault_type'] ?? '',
-      location: json['location'] ?? '',
-      possibleCause: json['possible_cause'] ?? '',
-      confidence: json['confidence'] ?? '',
-      safetyRisk: json['safety_risk'] ?? '',
+      faultName:
+          (json['faultName'] ?? json['fault_name'] ?? 'Unknown fault').toString(),
+      component: (json['component'] ?? 'Unknown component').toString(),
+      description: (json['description'] ?? '').toString(),
+      confidence: _toConfidence(json['confidence']),
+      possibleCauses: (json['possibleCauses'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
     );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'faultName': faultName,
+        'component': component,
+        'description': description,
+        'confidence': confidence,
+        'possibleCauses': possibleCauses,
+      };
+
+  static double _toConfidence(dynamic value) {
+    final parsed = value is num ? value.toDouble() : double.tryParse('$value');
+    var d = parsed ?? 0.0;
+    if (d > 1) d = d / 100; // accept 0-100 as well as 0-1
+    return d.clamp(0.0, 1.0).toDouble();
   }
 }
