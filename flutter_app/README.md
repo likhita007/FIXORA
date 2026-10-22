@@ -1,94 +1,123 @@
-# FIXORA – Flutter App & Integration
+# Fixora - Flutter App (Part 6: App & Integration)
 
-## Module
+AI-powered repair assistant: take a photo of a fault, get an AI diagnosis, pass
+a safety check, follow repair steps (with voice help) and verify the repair on
+an ESP32 circuit.
 
-Flutter App & Integration
+## Flow
 
-## Responsibility
+```
+Splash -> Home -> Camera -> Diagnosis -> Safety -> Repair Guide -> (Verify on ESP32)
+                  Home -> Voice assistant | Device (ESP32) | History
+```
 
-This module is responsible for developing the FIXORA mobile application
-and integrating the AI Vision, Safety Logic, Voice, ESP32 and Firebase
-modules into a single user-facing application.
+## Project structure
 
-## Objective
+```
+flutter_app/
+├── lib/
+│   ├── main.dart                  App entry, theme, Firebase init
+│   ├── firebase_options.dart      Placeholder (replace with flutterfire configure)
+│   ├── models/                    Diagnosis, SafetyResult, RepairSession
+│   ├── screens/                   Splash, Home, Camera, Diagnosis, Safety,
+│   │                              RepairGuide, Voice, Device, History
+│   ├── services/                  AI, Safety, Voice, ESP32, Firebase
+│   ├── widgets/                   StatusCard, LoadingView, ErrorView
+│   └── utils/app_constants.dart   Keys, URLs, collection names
+├── assets/images/
+├── test/
+├── pubspec.yaml
+└── README.md
+```
 
-The Flutter application provides the main interface through which a user
-can:
+## Setup (first time)
 
-1. Select a repair category.
-2. Capture an image of the faulty setup.
-3. Receive an AI-based diagnosis.
-4. View the safety assessment.
-5. Follow repair instructions.
-6. Verify the repair using the ESP32 hardware.
-7. Receive a final repair verification result.
+1. Install Flutter (stable) and run `flutter doctor`.
+2. This repo contains `lib/`, `test/`, `assets/` and `pubspec.yaml`. Generate the
+   native `android/` and `ios/` folders inside this folder:
+   ```
+   flutter create . --project-name fixora --org com.fixora
+   ```
+   (Existing files are kept.)
+3. `flutter pub get`
+4. Add the native permissions below.
+5. Run:
+   ```
+   flutter run --dart-define=GEMINI_API_KEY=your_key --dart-define=ESP32_HOST=192.168.4.1
+   ```
+   Without `GEMINI_API_KEY` the app runs in **demo mode** with a sample diagnosis,
+   so UI work never gets blocked by other modules.
 
-## Main Workflow
+### Android - `android/app/src/main/AndroidManifest.xml`
 
-Home
-→ Category Selection
-→ Camera Scan
-→ AI Diagnosis
-→ Safety Check
-→ Repair Guidance
-→ ESP32 Verification
-→ Repair Verified
+Inside `<manifest>`:
+```xml
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.CAMERA"/>
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<queries>
+  <intent>
+    <action android:name="android.speech.RecognitionService"/>
+  </intent>
+</queries>
+```
+On the `<application ...>` tag add `android:usesCleartextTraffic="true"` (the ESP32
+speaks plain HTTP).
 
-## Primary Demonstration
+In `android/app/build.gradle(.kts)` set `minSdk` to **23** (Firebase + camera).
 
-The primary demonstration is an electrical low-voltage educational
-circuit using the ESP32 prototype.
+### iOS - `ios/Runner/Info.plist`
+```xml
+<key>NSCameraUsageDescription</key><string>Fixora needs the camera to scan faults.</string>
+<key>NSMicrophoneUsageDescription</key><string>Fixora uses the microphone for voice help.</string>
+<key>NSSpeechRecognitionUsageDescription</key><string>Fixora converts your speech to text.</string>
+<key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
+```
 
-The intended demonstration is:
+## Firebase (Backend teammate)
 
-Circuit Fault
-→ Camera Scan
-→ AI Diagnosis
-→ Safety Check
-→ Repair Guidance
-→ User Repairs Circuit
-→ ESP32 Verification
-→ Repair Verified
+```
+dart pub global activate flutterfire_cli
+flutterfire configure
+```
+This overwrites `lib/firebase_options.dart`. Until then the app runs in
+local-only mode (history is kept in memory). Sessions are stored in the
+Firestore collection `repair_sessions` (see `RepairSession.toMap()`).
 
-## Flutter Responsibilities
+## Integration points with teammates
 
-- User interface development
-- Screen navigation
-- Camera interface
-- AI diagnosis integration
-- Safety result presentation
-- Repair guidance presentation
-- Voice interface integration
-- ESP32 communication integration
-- Firebase integration
-- Error handling
-- End-to-end testing
+| Module | Owner file | What to swap in |
+|---|---|---|
+| AI Vision & Diagnosis | `services/ai_service.dart` | Final Gemini prompts (`_diagnosisPrompt`) |
+| Voice Interaction | `services/voice_service.dart`, `screens/voice_screen.dart` | Conversation flow / follow-up questions |
+| ESP32 & Hardware | `services/esp32_service.dart` | Must expose the endpoints below |
+| Safety & Repair Logic | `services/safety_service.dart` | `classify()` and `repairStepsFor()` |
+| Backend & Database | `services/firebase_service.dart` | Collection/field names, security rules |
 
-## Integration Dependencies
+### ESP32 endpoint contract (all `GET`, JSON)
 
-The Flutter application depends on the following project modules:
+| Endpoint | Response |
+|---|---|
+| `/status` | `{"switch":"ON","led":"OFF","fault":"none"}` |
+| `/fault?type=led_open` | `{"ok":true}` (types: `led_open`, `switch_stuck`, `loose_wire`) |
+| `/reset` | `{"ok":true}` |
+| `/verify` | `{"repaired":true}` |
 
-### AI Vision
-Provides image analysis and structured diagnosis information.
+## Tests
 
-### Safety
-Provides safety classification and repair restrictions.
+```
+flutter test
+flutter analyze
+```
 
-### Voice
-Provides speech-to-text and text-to-speech functionality.
+## Upload to GitHub
 
-### ESP32
-Provides physical circuit verification.
-
-### Backend
-Provides Firebase-based session and repair information storage.
-
-## Status
-
-Flutter UI prototype and module integration are developed progressively
-as the other project modules become available.
-
-## Security
-
-API keys, authentication tokens, passwords and private credentials must
-not be committed to the GitHub repository.
+```
+git init
+git add .
+git commit -m "Fixora: Flutter app, integration layer"
+git branch -M main
+git remote add origin https://github.com/<your-user>/<repo>.git
+git push -u origin main
+```
+Never commit API keys; pass them with `--dart-define`.
