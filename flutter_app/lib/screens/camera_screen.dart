@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/gemini_service.dart';
 import 'diagnosis_screen.dart';
 
 class CameraScreen extends StatelessWidget {
@@ -43,10 +44,13 @@ class CameraScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
+                  // Connect to GeminiService to retrieve circuit diagnosis
+                  final diagnosis = GeminiService.getSampleDiagnosis();
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const DiagnosisScreen(),
+                      builder: (_) => DiagnosisScreen(diagnosis: diagnosis),
                     ),
                   );
                 },

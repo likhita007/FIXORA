@@ -48,7 +48,7 @@ Expected Result:
 AI returns structured diagnosis information.
 
 Status:
-Pending
+Passed (Integrated with AI Vision module via GeminiService)
 
 ---
 

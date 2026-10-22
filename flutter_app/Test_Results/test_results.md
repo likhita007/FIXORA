@@ -11,7 +11,7 @@ to the Flutter application.
 | TC01 | Application Launch | Home screen opens | Pending | Pending |
 | TC02 | Category Selection | Electrical selected | Pending | Pending |
 | TC03 | Camera Scan | Image captured | Pending | Pending |
-| TC04 | AI Diagnosis | Diagnosis received | Pending | Pending |
+| TC04 | AI Diagnosis | Diagnosis received | Structured diagnosis output parsed into Diagnosis domain model | Passed |
 | TC05 | Safety Check | Safety result displayed | Pending | Pending |
 | TC06 | Repair Guidance | Instructions displayed | Pending | Pending |
 | TC07 | ESP32 Verification | Verification received | Pending | Pending |
